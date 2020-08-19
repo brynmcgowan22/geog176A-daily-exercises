@@ -52,7 +52,10 @@ Use `dplyr` verbs to  create a data.frame of the **5** counties with the most cu
 (**Hint:** `filter`, `arrange`)
 
 ```{r}
-
+max_date = max(covid$date, na.rm = TRUE)
+filter(covid, date == max_date) %>%
+  arrange(-cases) %>%
+  head(5)
 ```
 
 ## Question 2: 
@@ -62,7 +65,13 @@ Use `dplyr` verbs to create a data.frame of the **5** states with the _most_ cas
 (**Hint:** `filter`, `group_by`, `summarize`, `arrange`)
 
 ```{r}
-
+max_date = max(covid$date, na.rm = TRUE)
+filter(covid, date == max_date) %>%
+  group_by(state) %>%
+  summarize(StateTot = sum(cases, na.rm = TRUE),
+              n = n()) %>%
+  arrange(-StateTot) %>% 
+  head(5)
 ```
 
 ## Question 3: 
@@ -72,7 +81,11 @@ Use the `dplyr` verbs to report the **5** counties with the _worst_ current deat
 (**Hint:** `filter`, `mutate`, `arrange`)
 
 ```{r}
-
+max_date = max(covid$date, na.rm = TRUE)
+filter(covid, date == max_date) %>%
+  mutate(deathRatio = deaths/cases * 100) %>%
+  arrange(-deathRatio) %>%
+  head(5)
 ```
 
 
@@ -83,7 +96,14 @@ Use the `dplyr` verbs to report the **5** states with the _worst_ current death/
 (**Hint:** `filter`, `group_by`, `summarize`, `mutate`, `arrange`)
 
 ```{r}
-
+max_date = max(covid$date, na.rm = TRUE)
+filter(covid, date == max_date) %>%
+  group_by(state) %>%
+  summarize(StateTotCase = sum(cases, na.rm = TRUE), StateTotDeath = sum(deaths, na.rm = TRUE),
+            n = n()) %>%
+  mutate(deathRatio = StateTotDeath/StateTotCase * 100) %>%
+  arrange(-deathRatio) %>%
+  head(5)
 ```
 
 
