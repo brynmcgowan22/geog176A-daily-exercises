@@ -1,7 +1,3 @@
-# Bryn McGowan
-# Daily Assignment 9
-# Sept 11 2020
-
 library(tidyverse)
 library(sf)
 library(units)
