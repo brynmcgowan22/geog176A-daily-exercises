@@ -1,7 +1,3 @@
-# Bryn McGowan
-# Daily Assignment 9
-# Sept 11 2020
-
 library(tidyverse)
 library(sf)
 library(units)
@@ -20,14 +16,14 @@ cities_eqa = cities_sf %>%
 cities_eqdc = cities_sf %>%
   st_transform(crs = eqdc)
 
-cities_sf %>%
-  st_distance
+st_distance(cities_sf)
 # 438312.8
 
-cities_eqa %>%
-  st_distance()
+st_distance(cities_eqa)
 # 440531.2
 
-cities_eqdc %>%
-  st_distance()
+st_distance(cities_eqdc) %>%
+  set_units("km") %>%
+  drop_units()
 # 432890.6
+# 432.8906
