@@ -1,0 +1,99 @@
+---
+title: "lab_14 Question 1"
+author: "Bryn McGowan"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sf)
+library(units)
+library(USAboundaries)
+library(gghighlight)
+library(ggrepel)
+library(rmapshaper)
+library(readxl)
+
+source("../R/utils.R")
+```
+
+### Question 1
+
+```{r, message=FALSE, warning=FALSE}
+conus = USAboundaries::us_counties(resolution = "low") %>%
+  filter(!state_name %in% c("Alaska", "Hawaii", "Puerto Rico")) %>%
+  st_transform(5070) %>%
+  st_centroid() %>%
+  st_combine()
+```
+
+```{r, message=FALSE, warning=FALSE}
+sf_conus = USAboundaries::us_counties(resolution = "low") %>%
+  filter(!state_name %in% c("Alaska", "Hawaii", "Puerto Rico")) %>%
+  st_transform(5070) %>%
+  mutate(id = 1:n())
+```
+
+```{r, message=FALSE, warning=FALSE}
+usa = USAboundaries::us_counties(resolution = "low") %>%
+  filter(!state_name %in% c("Alaska", "Hawaii", "Puerto Rico")) %>%
+  st_transform(5070) %>%
+  st_union() %>%
+  ms_simplify(keep = 0.1)
+```
+
+```{r, message=FALSE, warning=FALSE, results="hide"}
+mapview::npts(usa)
+```
+
+```{r, message=FALSE, warning=FALSE}
+v_conus = st_voronoi(conus) %>%
+  st_sf() %>%
+  st_cast() %>%
+  mutate(id = 1:n()) %>%
+  st_intersection(usa)
+```
+
+```{r, message=FALSE, warning=FALSE}
+t_conus = st_triangulate(conus) %>%
+  st_sf() %>%
+  st_cast() %>%
+  mutate(id = 1:n()) %>%
+  st_intersection(usa)
+```
+
+```{r, message=FALSE, warning=FALSE}
+gs_conus = st_make_grid(usa, n = 70, square = TRUE) %>%
+  st_sf() %>%
+  st_cast() %>%
+  mutate(id = 1:n())
+```
+
+```{r, message=FALSE, warning=FALSE}
+gh_conus = st_make_grid(usa, n = 70, square = FALSE) %>%
+  st_sf() %>%
+  st_cast() %>%
+  mutate(id = 1:n())
+```
+
+```{r, message=FALSE, warning=FALSE}
+county_plot = function(plot_data, plot_title) {
+  feat = plot_data %>%
+    as_tibble() %>%
+    select(id) %>%
+    summarise(max(id))
+
+  ggplot() +
+    geom_sf(data = plot_data, color = "navy", size = 0.2) +
+    aes(fillColor = "white") +
+    labs(title = plot_title,
+         caption = paste("Number of Features", feat)) +
+    theme_void()
+}
+
+county_plot(sf_conus, "US Counties")
+county_plot(v_conus, "Voroni Tesselation")
+county_plot(t_conus, "Delauny Triangulation Tesselation")
+county_plot(gs_conus, "Gridded Coverage")
+county_plot(gh_conus, "Hexagonal Coverage")
+```
