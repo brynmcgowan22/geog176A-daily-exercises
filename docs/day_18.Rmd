@@ -1,0 +1,49 @@
+---
+title: "Daily Exercise 18"
+author: "Bryn McGowan"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sf)
+library(USAboundariesData)
+library(USAboundaries)
+library(raster)
+# remotes::install_github("jhollist/elevatr")
+
+cities = read_csv('../data/uscities.csv')
+
+cities = cities %>% 
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>% 
+  filter(city == "Goleta") %>% 
+  st_transform(5070) %>% 
+  st_buffer(5000) %>% 
+  st_bbox() %>% 
+  st_as_sfc() %>% 
+  st_as_sf()
+
+elevation = elevatr::get_elev_raster(cities, z = 11) %>% 
+  crop(cities)
+
+plot(elevation)
+
+writeRaster(elevation, filename = "../img/goletaelev.tif", overwrite = T)
+
+elev = raster("~/github/geog176A-daily-exercises/img/goletaelev.tif")
+
+func = function(x){ ifelse(x > 0, 1, NA) }
+
+threshold = calc(elev, func)
+
+iso = (elevation * threshold)
+plot(iso, col = viridis::viridis(256))
+
+rcl = data.frame(min = seq(0, 500, 100), max = seq(100, 600, 100), lab = c(0:5))
+
+raster_reclass = reclassify(iso, rcl, lowerTRUE = TRUE)
+
+stack = stack(elev, threshold, iso, raster_reclass) %>%
+  setNames(c("elevation", "land", "terrain", "topography"))
+plot(stack, col = viridis::viridis(256))
+```

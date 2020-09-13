@@ -1,0 +1,34 @@
+---
+title: "Daily Exercise 17"
+author: "Bryn McGowan"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(sf)
+library(USAboundariesData)
+library(USAboundaries)
+library(raster)
+# remotes::install_github("jhollist/elevatr")
+
+cities = read_csv('../data/uscities.csv')
+
+cities = cities %>% 
+  st_as_sf(coords = c("lng", "lat"), crs = 4326) %>% 
+  filter(city == "Goleta") %>% 
+  st_transform(5070) %>% 
+  st_buffer(5000) %>% 
+  st_bbox() %>% 
+  st_as_sfc() %>% 
+  st_as_sf()
+
+elevation = elevatr::get_elev_raster(cities, z = 11) %>% 
+  crop(cities)
+
+plot(elevation)
+
+writeRaster(elevation, filename = "../img/goletaelev.tif", overwrite = T)
+
+elevation = raster("goletaelev.tif")
+```

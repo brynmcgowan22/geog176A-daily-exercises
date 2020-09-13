@@ -1,0 +1,28 @@
+---
+title: "Dail Exercise 16"
+author: "Bryn McGowan"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+
+library(tidyverse)
+library(sf)
+library(units)
+library(USAboundaries)
+library(rnaturalearth)
+library(gghighlight)
+library(ggrepel)
+library(knitr)
+library(rmapshaper)
+library(mapview)
+library(leaflet)
+library(leafem)
+library(leafpop)
+
+
+rivers = read_sf('../data/MajorRivers/MajorRivers.shp')
+
+
+```
+

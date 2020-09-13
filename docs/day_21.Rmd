@@ -1,0 +1,41 @@
+---
+title: "Daily Exercise 21"
+author: "Bryn McGowan"
+date: "9/13/2020"
+output: html_document
+---
+
+```{r, message=FALSE, warning=FALSE}
+library(elevatr)
+library(tidyverse)
+library(sf)
+library(raster)
+library(rgdal)
+library(climateR)
+library(whitebox)
+
+
+mo = AOI::aoi_get("Mount Saint Helens") %>%
+  AOI::aoi_buffer(0.5)
+
+elev  = elevatr::get_elev_raster(mo, z = 12) %>% 
+  crop(mo)
+
+writeRaster(elev, "../img/mountsthelenselev.tif", overwrite = TRUE)
+
+wbt_hillshade("../img/mountsthelenselev.tif", "../img/mountsthelenshillshade.tif")
+wbt_slope("../img/mountsthelenselev.tif", "../img/mountsthelensslope.tif")
+wbt_aspect("../img/mountsthelenselev.tif", "../img/mountsthelensaspect.tif")
+
+elev_r = raster("../img/mountsthelenselev.tif")
+plot(elev_r, axes = FALSE, box = FALSE, col = viridis::viridis(256), main = "Elevation")
+
+slope_r = raster("../img/mountsthelensslope.tif")
+plot(slope_r, axes = FALSE, box = FALSE, col = terrain.colors(256), main = "Slope")
+
+aspect_r = raster("../img/mountsthelensaspect.tif")
+plot(aspect_r, axes = FALSE, box = FALSE, col = rainbow(8), main = "Aspect")
+
+hill_r = raster("../img/mountsthelenshillshade.tif")
+plot(hill_r, axes = FALSE, box = FALSE, col = gray.colors(256, alpha = 0.8), main = "Hillshade")
+```
